@@ -14,6 +14,7 @@ class System():
         self.sys_data = []
         self.sys_time = []
         self.pops_activities = [[0]*len(pop_sizes)]
+        self.mean = [70, 120, 0]
         for i in self.pop_crowds:
             self.pops += [Population(pop_sizes[i], pop_neuron_data[i],
                                      connectivity_probability[i][i], J[i][i])]
@@ -40,10 +41,25 @@ class System():
         x = np.linspace(0, time, time)
         for _ in x:
             # result += [20]
-            result += [y+10]
-            y += np.random.normal(scale=1)
+            # result += [y+10]
+            # y += np.random.normal(scale=1)
             # y = random.uniform(10, 100)
             # y += random.uniform(-2, 2)
+            result += [random.uniform(20, 60)]
+        result = abs(np.convolve(result, np.ones((N,))/N)[(N-1):])
+
+        return result
+
+    def random_I_mean(self, i):
+        result = []
+        N = 40  # increase for a smoother curve
+        time = int(self.sys_duration * 1000 * (1.0/self.time_resolution))
+        x = np.linspace(0, time//2, time//2)
+        for _ in x:
+            result += [random.uniform(self.mean[i]-50, self.mean[i]+50)]
+        for _ in x:
+            result += [random.uniform(self.mean[1-i]-50, self.mean[1-i]+50)]
+
         result = abs(np.convolve(result, np.ones((N,))/N)[(N-1):])
 
         return result
@@ -53,7 +69,8 @@ class System():
         for i in self.pop_crowds:
             rc = 0
             if self.has_external_current[i]:
-                rc = self.random_I()
+                # rc = self.random_I()
+                rc = self.random_I_mean(i)
             else:
                 rc = [0]*int(self.sys_duration * 1000 *
                              (1.0/self.time_resolution))
